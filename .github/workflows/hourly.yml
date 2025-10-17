@@ -1,0 +1,29 @@
+name: Hourly Run
+
+on:
+  schedule:
+    - cron: "*/1 * * * *" # Every minute
+  workflow_dispatch: # Manual run option
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Run Python script
+        run: python main.py
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add last_run.txt
+          git commit -m "Auto update timestamp" || echo "No changes to commit"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.8.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
